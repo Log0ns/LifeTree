@@ -61,11 +61,6 @@
         .node-content.result {
             background: #f0f4f8;
             border-left-color: #2ecc71;
-            cursor: default;
-        }
-
-        .node-content.result:hover {
-            transform: none;
         }
 
         .question {
@@ -335,8 +330,10 @@
             div.appendChild(content);
 
             if (data.result) {
+                // Create the children container that will hold the result
                 const childDiv = document.createElement('div');
-                childDiv.className = 'children visible';
+                childDiv.className = 'children';
+                
                 const resultNode = document.createElement('div');
                 resultNode.className = 'node';
                 const resultContent = document.createElement('div');
@@ -405,6 +402,20 @@
                 resultNode.appendChild(resultContent);
                 childDiv.appendChild(resultNode);
                 div.appendChild(childDiv);
+                
+                // Make the option clickable to reveal result
+                content.addEventListener('click', () => {
+                    const children = div.querySelector('.children');
+                    const wasVisible = children.classList.contains('visible');
+                    
+                    if (wasVisible) {
+                        children.classList.remove('visible');
+                        content.classList.remove('selected');
+                    } else {
+                        children.classList.add('visible');
+                        content.classList.add('selected');
+                    }
+                });
             } else if (data.options) {
                 const childrenDiv = document.createElement('div');
                 childrenDiv.className = 'children';
