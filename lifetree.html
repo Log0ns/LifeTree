@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Decision Tree</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+            min-height: 100vh;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tree-container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .node {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+
+        .node.root {
+            padding-left: 0;
+        }
+
+        .node-content {
+            background: white;
+            padding: 1.25rem 1.75rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: inline-block;
+            max-width: 600px;
+        }
+
+        .node-content:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            border-left-color: #3498db;
+        }
+
+        .node-content.selected {
+            border-left-color: #3498db;
+            background: #ecf7ff;
+        }
+
+        .node-content.result {
+            background: #f0f4f8;
+            border-left-color: #2ecc71;
+            cursor: default;
+        }
+
+        .node-content.result:hover {
+            transform: none;
+        }
+
+        .question {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .option-text {
+            font-size: 1rem;
+            color: #34495e;
+        }
+
+        .result-text {
+            font-size: 1rem;
+            color: #2c3e50;
+            line-height: 1.7;
+            font-style: italic;
+        }
+
+        .link-button, .custom-button {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .link-button:hover, .custom-button:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .youtube-container {
+            margin-top: 1rem;
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+            border-radius: 8px;
+        }
+
+        .youtube-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .email-form {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .email-form textarea {
+            padding: 0.75rem;
+            border: 2px solid #e0e6ed;
+            border-radius: 6px;
+            font-family: 'Georgia', serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .email-form textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .email-form button {
+            align-self: flex-start;
+        }
+
+        .email-status {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #27ae60;
+        }
+
+        .children {
+            margin-top: 1rem;
+            margin-left: 1rem;
+            border-left: 2px solid #e0e6ed;
+            padding-left: 1rem;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .children.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .connector {
+            width: 20px;
+            height: 2px;
+            background: #e0e6ed;
+            display: inline-block;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        .reset-btn {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: white;
+            border: 2px solid #3498db;
+            color: #3498db;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .reset-btn:hover {
+            background: #3498db;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .node {
+                padding-left: 1rem;
+            }
+
+            .children {
+                margin-left: 0.5rem;
+                padding-left: 0.5rem;
+            }
+
+            .reset-btn {
+                top: 1rem;
+                right: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="reset-btn" onclick="reset()">Reset Tree</button>
+    <div class="tree-container" id="tree"></div>
+
+    <script>
+        // Configure your decision tree here
+        const treeData = {
+            question: "What brings you here today?",
+            options: [
+                {
+                    text: "I need to make a life decision",
+                    next: {
+                        question: "Is this decision urgent?",
+                        options: [
+                            {
+                                text: "Yes, I need to decide soon",
+                                next: {
+                                    question: "Have you considered all options?",
+                                    options: [
+                                        {
+                                            text: "Yes, thoroughly",
+                                            result: "Trust your intuition. When you've done the work, your gut feeling often knows the answer.",
+                                            link: "https://www.example.com/intuition-guide"
+                                        },
+                                        {
+                                            text: "No, not really",
+                                            result: "Take a moment to list all possibilities. Clarity comes from understanding what's available to you.",
+                                            button: {
+                                                text: "Decision Making Tool",
+                                                url: "https://www.example.com/decision-tool"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                text: "No, I have time",
+                                result: "Let the decision breathe. Sleep on it for a few nights and notice what feels right in the morning.",
+                                youtube: "dQw4w9WgXcQ"
+                            }
+                        ]
+                    }
+                },
+                {
+                    text: "I'm seeking clarity on a situation",
+                    next: {
+                        question: "Can you change the situation?",
+                        options: [
+                            {
+                                text: "Yes, I have some control",
+                                result: "Focus your energy on what you can influence. Let go of what you cannot."
+                            },
+                            {
+                                text: "No, it's beyond my control",
+                                result: "Acceptance is the path forward. Find peace in releasing what you cannot change."
+                            }
+                        ]
+                    }
+                },
+                {
+                    text: "I want to explore a possibility",
+                    next: {
+                        question: "What holds you back?",
+                        options: [
+                            {
+                                text: "Fear of failure",
+                                result: "Failure is simply feedback. Each attempt teaches you something valuable. Begin small if you must, but begin."
+                            },
+                            {
+                                text: "Uncertainty about the path",
+                                result: "The path reveals itself by walking. Take the first step, and the next will become clear."
+                            },
+                            {
+                                text: "Resources or time",
+                                result: "Start with what you have, where you are. Small consistent steps create extraordinary journeys."
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        let nodeIdCounter = 0;
+
+        function createNode(data, isRoot = false) {
+            const nodeId = `node-${nodeIdCounter++}`;
+            const div = document.createElement('div');
+            div.className = `node ${isRoot ? 'root' : ''}`;
+            div.id = nodeId;
+
+            const content = document.createElement('div');
+            content.className = 'node-content';
+            
+            if (data.question) {
+                content.innerHTML = `<div class="question">${data.question}</div>`;
+            } else if (data.text) {
+                content.innerHTML = `<div class="option-text">${data.text}</div>`;
+            }
+
+            div.appendChild(content);
+
+            if (data.result) {
+                const childDiv = document.createElement('div');
+                childDiv.className = 'children visible';
+                const resultNode = document.createElement('div');
+                resultNode.className = 'node';
+                const resultContent = document.createElement('div');
+                resultContent.className = 'node-content result';
+                resultContent.innerHTML = `<div class="result-text">${data.result}</div>`;
+                
+                // Add link if present
+                if (data.link) {
+                    const link = document.createElement('a');
+                    link.href = data.link;
+                    link.target = '_blank';
+                    link.className = 'link-button';
+                    link.textContent = 'Learn More';
+                    resultContent.appendChild(link);
+                }
+                
+                // Add custom button if present
+                if (data.button) {
+                    const button = document.createElement('a');
+                    button.href = data.button.url;
+                    button.target = '_blank';
+                    button.className = 'custom-button';
+                    button.textContent = data.button.text;
+                    resultContent.appendChild(button);
+                }
+                
+                // Add YouTube video if present
+                if (data.youtube) {
+                    const youtubeDiv = document.createElement('div');
+                    youtubeDiv.className = 'youtube-container';
+                    youtubeDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/${data.youtube}" allowfullscreen></iframe>`;
+                    resultContent.appendChild(youtubeDiv);
+                }
+                
+                // Add email form if present
+                if (data.email) {
+                    const form = document.createElement('div');
+                    form.className = 'email-form';
+                    form.innerHTML = `
+                        <textarea placeholder="Type your message here..."></textarea>
+                        <button class="custom-button">Send Email</button>
+                        <div class="email-status"></div>
+                    `;
+                    
+                    const button = form.querySelector('button');
+                    const textarea = form.querySelector('textarea');
+                    const status = form.querySelector('.email-status');
+                    
+                    button.addEventListener('click', () => {
+                        const message = textarea.value.trim();
+                        if (message) {
+                            const subject = encodeURIComponent('Message from Decision Tree');
+                            const body = encodeURIComponent(message);
+                            window.open(`mailto:${data.email}?subject=${subject}&body=${body}`);
+                            status.textContent = 'Opening your email client...';
+                            textarea.value = '';
+                        } else {
+                            status.textContent = 'Please enter a message first.';
+                            status.style.color = '#e74c3c';
+                        }
+                    });
+                    
+                    resultContent.appendChild(form);
+                }
+                
+                resultNode.appendChild(resultContent);
+                childDiv.appendChild(resultNode);
+                div.appendChild(childDiv);
+            } else if (data.options) {
+                const childrenDiv = document.createElement('div');
+                childrenDiv.className = 'children';
+                
+                data.options.forEach(option => {
+                    const childNode = createNode(option.next ? { ...option.next, text: option.text } : option);
+                    childrenDiv.appendChild(childNode);
+                });
+                
+                div.appendChild(childrenDiv);
+
+                content.addEventListener('click', () => {
+                    const children = div.querySelector('.children');
+                    const wasVisible = children.classList.contains('visible');
+                    
+                    if (wasVisible) {
+                        children.classList.remove('visible');
+                        content.classList.remove('selected');
+                    } else {
+                        children.classList.add('visible');
+                        content.classList.add('selected');
+                    }
+                });
+            }
+
+            return div;
+        }
+
+        function render() {
+            const container = document.getElementById('tree');
+            container.innerHTML = '';
+            nodeIdCounter = 0;
+            const rootNode = createNode(treeData, true);
+            container.appendChild(rootNode);
+        }
+
+        function reset() {
+            render();
+        }
+
+        render();
+    </script>
+</body>
+</html>
