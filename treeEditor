@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Tree Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .tree-view {
+            margin-top: 20px;
+        }
+
+        .node {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .node.selected {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .node-question {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .node-question:hover {
+            color: #667eea;
+        }
+
+        .option {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0 8px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(4px);
+        }
+
+        .option-text {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+
+        .result-badge {
+            display: inline-block;
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .link-badge {
+            display: inline-block;
+            background: #cce5ff;
+            color: #004085;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 4px;
+            margin-left: 4px;
+        }
+
+        .editor-form {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.secondary:hover {
+            background: #5a6268;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        button.danger:hover {
+            background: #c82333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .code-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .info-text {
+            color: #6c757d;
+            font-size: 13px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .copy-button {
+            float: right;
+            margin-bottom: 10px;
+        }
+
+        .node-path {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h1>🌳 Tree Structure</h1>
+            <div id="treeView" class="tree-view"></div>
+        </div>
+
+        <div class="panel">
+            <h1>✏️ Editor</h1>
+            <div id="editor"></div>
+            
+            <h1 style="margin-top: 30px;">📋 Output Code</h1>
+            <button class="copy-button" onclick="copyCode()">Copy Code</button>
+            <div class="code-output" id="codeOutput"></div>
+        </div>
+    </div>
+
+    <script>
+        let treeData = {
+            question: "What brings you here today?",
+            options: [
+                {
+                    text: "I need to make a life decision",
+                    next: {
+                        question: "Is this decision urgent?",
+                        options: [
+                            {
+                                text: "Yes, I need to decide soon",
+                                next: {
+                                    question: "Have you considered all options?",
+                                    options: [
+                                        {
+                                            text: "Yes, thoroughly",
+                                            result: "Trust your intuition. When you've done the work, your gut feeling often knows the answer.",
+                                            link: "https://www.example.com/intuition-guide"
+                                        },
+                                        {
+                                            text: "No, not really",
+                                            result: "Take a moment to list all possibilities. Clarity comes from understanding what's available to you.",
+                                            button: {
+                                                text: "Decision Making Tool",
+                                                url: "https://www.example.com/decision-tool"
+                                            }
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                text: "No, I have time",
+                                result: "Let the decision breathe. Sleep on it for a few nights and notice what feels right in the morning.",
+                                youtube: "dQw4w9WgXcQ"
+                            }
+                        ]
+                    }
+                },
+                {
+                    text: "I'm seeking clarity on a situation",
+                    next: {
+                        question: "Can you change the situation?",
+                        options: [
+                            {
+                                text: "Yes, I have some control",
+                                result: "Focus your energy on what you can influence. Let go of what you cannot."
+                            },
+                            {
+                                text: "No, it's beyond my control",
+                                result: "Acceptance is the path forward. Find peace in releasing what you cannot change."
+                            }
+                        ]
+                    }
+                },
+                {
+                    text: "I want to explore a possibility",
+                    next: {
+                        question: "What holds you back?",
+                        options: [
+                            {
+                                text: "Fear of failure",
+                                result: "Failure is simply feedback. Each attempt teaches you something valuable. Begin small if you must, but begin."
+                            },
+                            {
+                                text: "Uncertainty about the path",
+                                result: "The path reveals itself by walking. Take the first step, and the next will become clear."
+                            },
+                            {
+                                text: "Resources or time",
+                                result: "Start with what you have, where you are. Small consistent steps create extraordinary journeys."
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        let selectedPath = [];
+
+        function renderTree() {
+            const treeView = document.getElementById('treeView');
+            treeView.innerHTML = '';
+            renderNode(treeData, treeView, []);
+            updateCodeOutput();
+        }
+
+        function renderNode(node, container, path) {
+            const nodeDiv = document.createElement('div');
+            nodeDiv.className = 'node';
+            
+            if (arraysEqual(path, selectedPath)) {
+                nodeDiv.className += ' selected';
+            }
+
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'node-question';
+            questionDiv.textContent = node.question;
+            questionDiv.onclick = () => selectNode(path);
+            nodeDiv.appendChild(questionDiv);
+
+            if (node.options) {
+                node.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    
+                    const optionPath = [...path, index];
+                    
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'option-text';
+                    textDiv.textContent = option.text;
+                    optionDiv.appendChild(textDiv);
+
+                    if (option.result) {
+                        const badge = document.createElement('span');
+                        badge.className = 'result-badge';
+                        badge.textContent = 'Result';
+                        optionDiv.appendChild(badge);
+                    }
+
+                    if (option.link) {
+                        const badge = document.createElement('span');
+                        badge.className = 'link-badge';
+                        badge.textContent = 'Link';
+                        optionDiv.appendChild(badge);
+                    }
+
+                    if (option.button) {
+                        const badge = document.createElement('span');
+                        badge.className = 'link-badge';
+                        badge.textContent = 'Button';
+                        optionDiv.appendChild(badge);
+                    }
+
+                    if (option.youtube) {
+                        const badge = document.createElement('span');
+                        badge.className = 'link-badge';
+                        badge.textContent = 'YouTube';
+                        optionDiv.appendChild(badge);
+                    }
+
+                    optionDiv.onclick = () => selectNode(optionPath);
+                    optionDiv.appendChild(textDiv);
+                    nodeDiv.appendChild(optionDiv);
+
+                    if (option.next) {
+                        renderNode(option.next, optionDiv, optionPath);
+                    }
+                });
+            }
+
+            container.appendChild(nodeDiv);
+        }
+
+        function selectNode(path) {
+            selectedPath = path;
+            renderTree();
+            showEditor(path);
+        }
+
+        function showEditor(path) {
+            const editor = document.getElementById('editor');
+            const node = getNodeAtPath(treeData, path);
+            
+            if (path.length === 0) {
+                editor.innerHTML = `
+                    <div class="editor-form">
+                        <div class="node-path">Root Question</div>
+                        <div class="form-group">
+                            <label>Question Text</label>
+                            <input type="text" id="questionInput" value="${node.question}">
+                        </div>
+                        <div class="button-group">
+                            <button onclick="updateQuestion()">Update Question</button>
+                            <button class="secondary" onclick="addOption()">Add Option</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const option = node;
+                const hasNext = !!option.next;
+                
+                editor.innerHTML = `
+                    <div class="editor-form">
+                        <div class="node-path">Path: ${path.join(' → ')}</div>
+                        <div class="form-group">
+                            <label>Option Text</label>
+                            <input type="text" id="optionText" value="${option.text}">
+                        </div>
+                        
+                        ${!hasNext ? `
+                        <div class="form-group">
+                            <label>Result (optional)</label>
+                            <textarea id="resultText">${option.result || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Link URL (optional)</label>
+                            <input type="text" id="linkUrl" value="${option.link || ''}">
+                            <div class="info-text">Direct link shown below result</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Button Text (optional)</label>
+                            <input type="text" id="buttonText" value="${option.button ? option.button.text : ''}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Button URL (optional)</label>
+                            <input type="text" id="buttonUrl" value="${option.button ? option.button.url : ''}">
+                            <div class="info-text">Creates a clickable button</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>YouTube Video ID (optional)</label>
+                            <input type="text" id="youtubeId" value="${option.youtube || ''}">
+                            <div class="info-text">e.g., "dQw4w9WgXcQ" from youtube.com/watch?v=dQw4w9WgXcQ</div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="button-group">
+                            <button onclick="updateOption()">Update Option</button>
+                            ${!hasNext ? `<button class="secondary" onclick="convertToQuestion()">Convert to Question</button>` : ''}
+                            <button class="danger" onclick="deleteOption()">Delete Option</button>
+                        </div>
+                        
+                        ${hasNext ? `
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e9ecef;">
+                            <div class="form-group">
+                                <label>Sub-Question</label>
+                                <input type="text" id="subQuestion" value="${option.next.question}">
+                            </div>
+                            <div class="button-group">
+                                <button onclick="updateSubQuestion()">Update Sub-Question</button>
+                                <button class="secondary" onclick="addSubOption()">Add Sub-Option</button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        function getNodeAtPath(root, path) {
+            if (path.length === 0) return root;
+            
+            let current = root;
+            for (let i = 0; i < path.length; i++) {
+                if (i === path.length - 1) {
+                    return current.options[path[i]];
+                } else {
+                    current = current.options[path[i]].next;
+                }
+            }
+            return current;
+        }
+
+        function updateQuestion() {
+            const question = document.getElementById('questionInput').value;
+            treeData.question = question;
+            renderTree();
+        }
+
+        function addOption() {
+            if (!treeData.options) treeData.options = [];
+            treeData.options.push({
+                text: "New option",
+                result: "New result"
+            });
+            renderTree();
+        }
+
+        function updateOption() {
+            const option = getNodeAtPath(treeData, selectedPath);
+            option.text = document.getElementById('optionText').value;
+            
+            const result = document.getElementById('resultText');
+            if (result) {
+                option.result = result.value || undefined;
+                if (!option.result) delete option.result;
+            }
+            
+            const link = document.getElementById('linkUrl');
+            if (link) {
+                option.link = link.value || undefined;
+                if (!option.link) delete option.link;
+            }
+            
+            const buttonText = document.getElementById('buttonText');
+            const buttonUrl = document.getElementById('buttonUrl');
+            if (buttonText && buttonUrl) {
+                if (buttonText.value && buttonUrl.value) {
+                    option.button = {
+                        text: buttonText.value,
+                        url: buttonUrl.value
+                    };
+                } else {
+                    delete option.button;
+                }
+            }
+            
+            const youtube = document.getElementById('youtubeId');
+            if (youtube) {
+                option.youtube = youtube.value || undefined;
+                if (!option.youtube) delete option.youtube;
+            }
+            
+            renderTree();
+        }
+
+        function deleteOption() {
+            if (selectedPath.length === 0) {
+                alert("Cannot delete root node");
+                return;
+            }
+            
+            const parentPath = selectedPath.slice(0, -1);
+            const index = selectedPath[selectedPath.length - 1];
+            const parent = parentPath.length === 0 ? treeData : getNodeAtPath(treeData, parentPath).next;
+            
+            parent.options.splice(index, 1);
+            selectedPath = [];
+            renderTree();
+        }
+
+        function convertToQuestion() {
+            const option = getNodeAtPath(treeData, selectedPath);
+            option.next = {
+                question: "New question?",
+                options: [
+                    { text: "Option 1", result: "Result 1" },
+                    { text: "Option 2", result: "Result 2" }
+                ]
+            };
+            delete option.result;
+            delete option.link;
+            delete option.button;
+            delete option.youtube;
+            renderTree();
+        }
+
+        function updateSubQuestion() {
+            const option = getNodeAtPath(treeData, selectedPath);
+            option.next.question = document.getElementById('subQuestion').value;
+            renderTree();
+        }
+
+        function addSubOption() {
+            const option = getNodeAtPath(treeData, selectedPath);
+            if (!option.next.options) option.next.options = [];
+            option.next.options.push({
+                text: "New sub-option",
+                result: "New result"
+            });
+            renderTree();
+        }
+
+        function updateCodeOutput() {
+            const code = `const treeData = ${JSON.stringify(treeData, null, 4)};`;
+            document.getElementById('codeOutput').textContent = code;
+        }
+
+        function copyCode() {
+            const code = document.getElementById('codeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        }
+
+        function arraysEqual(a, b) {
+            return a.length === b.length && a.every((val, index) => val === b[index]);
+        }
+
+        renderTree();
+    </script>
+</body>
+</html>
