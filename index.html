@@ -421,8 +421,41 @@
                 childrenDiv.className = 'children';
                 
                 data.options.forEach(option => {
-                    const childNode = createNode(option.next ? { ...option.next, text: option.text } : option);
-                    childrenDiv.appendChild(childNode);
+                    if (option.next) {
+                        // Create a node for the option text
+                        const optionNode = document.createElement('div');
+                        optionNode.className = 'node';
+                        
+                        const optionContent = document.createElement('div');
+                        optionContent.className = 'node-content';
+                        optionContent.innerHTML = `<div class="option-text">${option.text}</div>`;
+                        optionNode.appendChild(optionContent);
+                        
+                        // Create children container for the next question/result
+                        const optionChildren = document.createElement('div');
+                        optionChildren.className = 'children';
+                        
+                        const nextNode = createNode(option.next);
+                        optionChildren.appendChild(nextNode);
+                        optionNode.appendChild(optionChildren);
+                        
+                        // Make clickable
+                        optionContent.addEventListener('click', () => {
+                            const wasVisible = optionChildren.classList.contains('visible');
+                            if (wasVisible) {
+                                optionChildren.classList.remove('visible');
+                                optionContent.classList.remove('selected');
+                            } else {
+                                optionChildren.classList.add('visible');
+                                optionContent.classList.add('selected');
+                            }
+                        });
+                        
+                        childrenDiv.appendChild(optionNode);
+                    } else {
+                        const childNode = createNode(option);
+                        childrenDiv.appendChild(childNode);
+                    }
                 });
                 
                 div.appendChild(childrenDiv);
