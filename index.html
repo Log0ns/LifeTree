@@ -235,80 +235,51 @@
     <script>
         // Configure your decision tree here
         const treeData = {
-            question: "What brings you here today?",
-            options: [
-                {
-                    text: "I need to make a life decision",
-                    next: {
-                        question: "Is this decision urgent?",
-                        options: [
-                            {
-                                text: "Yes, I need to decide soon",
-                                next: {
-                                    question: "Have you considered all options?",
-                                    options: [
-                                        {
-                                            text: "Yes, thoroughly",
-                                            result: "Trust your intuition. When you've done the work, your gut feeling often knows the answer.",
-                                            link: "https://www.example.com/intuition-guide"
-                                        },
-                                        {
-                                            text: "No, not really",
-                                            result: "Take a moment to list all possibilities. Clarity comes from understanding what's available to you.",
-                                            button: {
-                                                text: "Decision Making Tool",
-                                                url: "https://www.example.com/decision-tool"
-                                            }
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                text: "No, I have time",
-                                result: "Let the decision breathe. Sleep on it for a few nights and notice what feels right in the morning.",
-                                youtube: "k_jhyiQ5-fs"
-                            }
-                        ]
+    "question": "What brings you here today?",
+    "options": [
+        {
+            "text": "I need to make a life decision",
+            "result": "New result",
+            "youtube": "k_jhyiQ5-fs"
+        },
+        {
+            "text": "I'm seeking clarity on a situation",
+            "next": {
+                "question": "Can you change the situation?",
+                "options": [
+                    {
+                        "text": "Yes, I have some control",
+                        "result": "Focus your energy on what you can influence. Let go of what you cannot."
+                    },
+                    {
+                        "text": "No, it's beyond my control",
+                        "result": "Acceptance is the path forward. Find peace in releasing what you cannot change."
                     }
-                },
-                {
-                    text: "I'm seeking clarity on a situation",
-                    next: {
-                        question: "Can you change the situation?",
-                        options: [
-                            {
-                                text: "Yes, I have some control",
-                                result: "Focus your energy on what you can influence. Let go of what you cannot."
-                            },
-                            {
-                                text: "No, it's beyond my control",
-                                result: "Acceptance is the path forward. Find peace in releasing what you cannot change."
-                            }
-                        ]
+                ]
+            }
+        },
+        {
+            "text": "I want to explore a possibility",
+            "next": {
+                "question": "What holds you back?",
+                "options": [
+                    {
+                        "text": "Fear of failure",
+                        "result": "Failure is simply feedback. Each attempt teaches you something valuable. Begin small if you must, but begin."
+                    },
+                    {
+                        "text": "Uncertainty about the path",
+                        "result": "The path reveals itself by walking. Take the first step, and the next will become clear."
+                    },
+                    {
+                        "text": "Resources or time",
+                        "result": "Start with what you have, where you are. Small consistent steps create extraordinary journeys."
                     }
-                },
-                {
-                    text: "I want to explore a possibility",
-                    next: {
-                        question: "What holds you back?",
-                        options: [
-                            {
-                                text: "Fear of failure",
-                                result: "Failure is simply feedback. Each attempt teaches you something valuable. Begin small if you must, but begin."
-                            },
-                            {
-                                text: "Uncertainty about the path",
-                                result: "The path reveals itself by walking. Take the first step, and the next will become clear."
-                            },
-                            {
-                                text: "Resources or time",
-                                result: "Start with what you have, where you are. Small consistent steps create extraordinary journeys."
-                            }
-                        ]
-                    }
-                }
-            ]
-        };
+                ]
+            }
+        }
+    ]
+};
 
         let nodeIdCounter = 0;
 
