@@ -12,33 +12,78 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f7;
             min-height: 100vh;
-            padding: 20px;
+            padding: 24px;
+            color: #1d1d1f;
+        }
+
+        .header {
+            max-width: 1600px;
+            margin: 0 auto 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px 32px;
+            border-radius: 8px;
+            border: 1px solid #e5e5e7;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            height: calc(100vh - 40px);
+            gap: 24px;
+            min-height: calc(100vh - 140px);
         }
 
         .panel {
             background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 32px;
             overflow-y: auto;
+            border: 1px solid #e5e5e7;
+            max-height: calc(100vh - 140px);
         }
 
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 24px;
+        .panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .panel::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .panel::-webkit-scrollbar-thumb {
+            background: #d1d1d6;
+            border-radius: 4px;
+        }
+
+        .panel::-webkit-scrollbar-thumb:hover {
+            background: #b0b0b5;
+        }
+
+        .panel-header {
+            color: #1d1d1f;
+            margin-bottom: 24px;
+            font-size: 18px;
+            font-weight: 600;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e5e7;
         }
 
         .tree-view {
@@ -46,200 +91,335 @@
         }
 
         .node {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 16px;
-            margin: 12px 0;
-            position: relative;
+            background: #fafafa;
+            border: 1px solid #e5e5e7;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 16px 0;
+            transition: all 0.2s ease;
+        }
+
+        .node:hover {
+            border-color: #c5c5c7;
         }
 
         .node.selected {
-            border-color: #667eea;
-            background: #f0f3ff;
+            border-color: #007aff;
+            background: #f0f8ff;
         }
 
         .node-question {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 12px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 16px;
             cursor: pointer;
+            font-size: 15px;
+            line-height: 1.5;
         }
 
         .node-question:hover {
-            color: #667eea;
+            color: #007aff;
         }
 
         .option {
             background: white;
-            border: 1px solid #dee2e6;
+            border: 1px solid #e5e5e7;
             border-radius: 6px;
-            padding: 12px;
-            margin: 8px 0 8px 20px;
+            padding: 16px;
+            margin: 12px 0 12px 24px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .option:hover {
-            border-color: #667eea;
+            border-color: #007aff;
             transform: translateX(4px);
         }
 
         .option-text {
+            font-weight: 400;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
             font-weight: 500;
-            color: #495057;
-            margin-bottom: 4px;
+            margin-right: 6px;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
         }
 
         .result-badge {
-            display: inline-block;
-            background: #d4edda;
-            color: #155724;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 4px;
+            background: #e8f5e9;
+            color: #2e7d32;
         }
 
         .link-badge {
-            display: inline-block;
-            background: #cce5ff;
-            color: #004085;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            margin-top: 4px;
-            margin-left: 4px;
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .button-badge {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .youtube-badge {
+            background: #ffebee;
+            color: #c62828;
         }
 
         .editor-form {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: #fafafa;
+            border-radius: 6px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #e5e5e7;
         }
 
         .form-group {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         label {
             display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 6px;
-            font-size: 14px;
+            font-weight: 500;
+            color: #1d1d1f;
+            margin-bottom: 8px;
+            font-size: 13px;
         }
 
         input[type="text"],
         textarea {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
+            padding: 10px 12px;
+            border: 1px solid #d1d1d6;
+            border-radius: 4px;
             font-size: 14px;
             font-family: inherit;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
+            background: white;
         }
 
         input[type="text"]:focus,
         textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #007aff;
         }
 
         textarea {
             resize: vertical;
-            min-height: 80px;
+            min-height: 100px;
+            line-height: 1.6;
         }
 
         button {
-            background: #667eea;
+            background: #007aff;
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s ease;
         }
 
         button:hover {
-            background: #5568d3;
+            background: #0051d5;
+        }
+
+        button:active {
+            transform: scale(0.98);
         }
 
         button.secondary {
-            background: #6c757d;
+            background: #8e8e93;
         }
 
         button.secondary:hover {
-            background: #5a6268;
+            background: #636366;
         }
 
         button.danger {
-            background: #dc3545;
+            background: #ff3b30;
         }
 
         button.danger:hover {
-            background: #c82333;
+            background: #d62b1f;
+        }
+
+        button.success {
+            background: #34c759;
+        }
+
+        button.success:hover {
+            background: #248a3d;
         }
 
         .button-group {
             display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
-
-        .code-output {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            padding: 20px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
         .info-text {
-            color: #6c757d;
-            font-size: 13px;
-            margin-top: 8px;
-            font-style: italic;
-        }
-
-        .copy-button {
-            float: right;
-            margin-bottom: 10px;
+            color: #8e8e93;
+            font-size: 12px;
+            margin-top: 6px;
         }
 
         .node-path {
             font-size: 12px;
-            color: #6c757d;
-            margin-bottom: 8px;
+            color: #007aff;
+            margin-bottom: 16px;
+            font-weight: 500;
+            padding: 8px 12px;
+            background: #f0f8ff;
+            border-radius: 4px;
+            border-left: 2px solid #007aff;
+        }
+
+        .divider {
+            margin: 24px 0;
+            padding-top: 24px;
+            border-top: 1px solid #e5e5e7;
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            background: #34c759;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .save-indicator.show {
+            opacity: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 32px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e5e7;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .close-button {
+            background: #8e8e93;
+            padding: 8px 16px;
+        }
+
+        .code-output {
+            background: #1d1d1f;
+            color: #f5f5f7;
+            padding: 24px;
+            border-radius: 6px;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>Decision Tree Editor</h1>
+        <div class="header-actions">
+            <button class="success" onclick="saveToStorage()">Save</button>
+            <button class="secondary" onclick="loadFromStorage()">Load</button>
+            <button onclick="showExportModal()">Export Code</button>
+            <button class="danger" onclick="clearStorage()">Clear</button>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator">Saved successfully</div>
+
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Export Code</h2>
+                <button class="close-button" onclick="hideExportModal()">Close</button>
+            </div>
+            <div class="code-output" id="codeOutput"></div>
+            <button onclick="copyCode()">Copy to Clipboard</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="panel">
-            <h1>🌳 Tree Structure</h1>
+            <div class="panel-header">Tree Structure</div>
             <div id="treeView" class="tree-view"></div>
         </div>
 
         <div class="panel">
-            <h1>✏️ Editor</h1>
+            <div class="panel-header">Editor</div>
             <div id="editor"></div>
-            
-            <h1 style="margin-top: 30px;">📋 Output Code</h1>
-            <button class="copy-button" onclick="copyCode()">Copy Code</button>
-            <div class="code-output" id="codeOutput"></div>
         </div>
     </div>
 
     <script>
+        const STORAGE_KEY = 'decisionTreeData';
+
         let treeData = {
             question: "What brings you here today?",
             options: [
@@ -318,11 +498,92 @@
 
         let selectedPath = [];
 
+        function init() {
+            loadFromStorageAuto();
+            renderTree();
+        }
+
+        function saveToStorage() {
+            try {
+                const dataStr = JSON.stringify(treeData);
+                localStorage.setItem(STORAGE_KEY, dataStr);
+                showSaveIndicator();
+            } catch (e) {
+                alert('Error saving to storage: ' + e.message);
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const dataStr = localStorage.getItem(STORAGE_KEY);
+                if (dataStr) {
+                    treeData = JSON.parse(dataStr);
+                    selectedPath = [];
+                    renderTree();
+                    alert('Data loaded successfully');
+                } else {
+                    alert('No saved data found');
+                }
+            } catch (e) {
+                alert('Error loading data: ' + e.message);
+            }
+        }
+
+        function loadFromStorageAuto() {
+            try {
+                const dataStr = localStorage.getItem(STORAGE_KEY);
+                if (dataStr) {
+                    treeData = JSON.parse(dataStr);
+                }
+            } catch (e) {
+                console.error('Error loading data:', e);
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('Are you sure you want to clear all saved data? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                alert('Storage cleared');
+            }
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000);
+        }
+
+        function showExportModal() {
+            const code = `const treeData = ${JSON.stringify(treeData, null, 4)};`;
+            document.getElementById('codeOutput').textContent = code;
+            document.getElementById('exportModal').classList.add('show');
+        }
+
+        function hideExportModal() {
+            document.getElementById('exportModal').classList.remove('show');
+        }
+
+        function copyCode() {
+            const code = document.getElementById('codeOutput').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const indicator = document.getElementById('saveIndicator');
+                indicator.textContent = 'Code copied';
+                indicator.classList.add('show');
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                    setTimeout(() => {
+                        indicator.textContent = 'Saved successfully';
+                    }, 300);
+                }, 2000);
+            });
+        }
+
         function renderTree() {
             const treeView = document.getElementById('treeView');
             treeView.innerHTML = '';
             renderNode(treeData, treeView, []);
-            updateCodeOutput();
         }
 
         function renderNode(node, container, path) {
@@ -351,36 +612,41 @@
                     textDiv.textContent = option.text;
                     optionDiv.appendChild(textDiv);
 
+                    const badgesDiv = document.createElement('div');
+
                     if (option.result) {
                         const badge = document.createElement('span');
-                        badge.className = 'result-badge';
-                        badge.textContent = 'Result';
-                        optionDiv.appendChild(badge);
+                        badge.className = 'badge result-badge';
+                        badge.textContent = 'result';
+                        badgesDiv.appendChild(badge);
                     }
 
                     if (option.link) {
                         const badge = document.createElement('span');
-                        badge.className = 'link-badge';
-                        badge.textContent = 'Link';
-                        optionDiv.appendChild(badge);
+                        badge.className = 'badge link-badge';
+                        badge.textContent = 'link';
+                        badgesDiv.appendChild(badge);
                     }
 
                     if (option.button) {
                         const badge = document.createElement('span');
-                        badge.className = 'link-badge';
-                        badge.textContent = 'Button';
-                        optionDiv.appendChild(badge);
+                        badge.className = 'badge button-badge';
+                        badge.textContent = 'button';
+                        badgesDiv.appendChild(badge);
                     }
 
                     if (option.youtube) {
                         const badge = document.createElement('span');
-                        badge.className = 'link-badge';
-                        badge.textContent = 'YouTube';
-                        optionDiv.appendChild(badge);
+                        badge.className = 'badge youtube-badge';
+                        badge.textContent = 'youtube';
+                        badgesDiv.appendChild(badge);
                     }
 
-                    optionDiv.onclick = () => selectNode(optionPath);
-                    optionDiv.appendChild(textDiv);
+                    optionDiv.appendChild(badgesDiv);
+                    optionDiv.onclick = (e) => {
+                        e.stopPropagation();
+                        selectNode(optionPath);
+                    };
                     nodeDiv.appendChild(optionDiv);
 
                     if (option.next) {
@@ -403,12 +669,13 @@
             const node = getNodeAtPath(treeData, path);
             
             if (path.length === 0) {
+                // Root question
                 editor.innerHTML = `
                     <div class="editor-form">
                         <div class="node-path">Root Question</div>
                         <div class="form-group">
                             <label>Question Text</label>
-                            <input type="text" id="questionInput" value="${node.question}">
+                            <input type="text" id="questionInput" value="${escapeHtml(node.question)}">
                         </div>
                         <div class="button-group">
                             <button onclick="updateQuestion()">Update Question</button>
@@ -417,6 +684,7 @@
                     </div>
                 `;
             } else {
+                // This is an option
                 const option = node;
                 const hasNext = !!option.next;
                 
@@ -425,35 +693,36 @@
                         <div class="node-path">Path: ${path.join(' → ')}</div>
                         <div class="form-group">
                             <label>Option Text</label>
-                            <input type="text" id="optionText" value="${option.text}">
+                            <input type="text" id="optionText" value="${escapeHtml(option.text)}">
                         </div>
                         
                         ${!hasNext ? `
                         <div class="form-group">
                             <label>Result (optional)</label>
-                            <textarea id="resultText">${option.result || ''}</textarea>
+                            <textarea id="resultText">${escapeHtml(option.result || '')}</textarea>
+                            <div class="info-text">Leave empty if this option leads to another question</div>
                         </div>
                         
                         <div class="form-group">
                             <label>Link URL (optional)</label>
-                            <input type="text" id="linkUrl" value="${option.link || ''}">
+                            <input type="text" id="linkUrl" value="${escapeHtml(option.link || '')}">
                             <div class="info-text">Direct link shown below result</div>
                         </div>
                         
                         <div class="form-group">
                             <label>Button Text (optional)</label>
-                            <input type="text" id="buttonText" value="${option.button ? option.button.text : ''}">
+                            <input type="text" id="buttonText" value="${escapeHtml(option.button ? option.button.text : '')}">
                         </div>
                         
                         <div class="form-group">
                             <label>Button URL (optional)</label>
-                            <input type="text" id="buttonUrl" value="${option.button ? option.button.url : ''}">
+                            <input type="text" id="buttonUrl" value="${escapeHtml(option.button ? option.button.url : '')}">
                             <div class="info-text">Creates a clickable button</div>
                         </div>
                         
                         <div class="form-group">
                             <label>YouTube Video ID (optional)</label>
-                            <input type="text" id="youtubeId" value="${option.youtube || ''}">
+                            <input type="text" id="youtubeId" value="${escapeHtml(option.youtube || '')}">
                             <div class="info-text">e.g., "dQw4w9WgXcQ" from youtube.com/watch?v=dQw4w9WgXcQ</div>
                         </div>
                         ` : ''}
@@ -461,14 +730,16 @@
                         <div class="button-group">
                             <button onclick="updateOption()">Update Option</button>
                             ${!hasNext ? `<button class="secondary" onclick="convertToQuestion()">Convert to Question</button>` : ''}
+                            ${hasNext ? `<button class="danger" onclick="convertToResult()">Convert to Result</button>` : ''}
                             <button class="danger" onclick="deleteOption()">Delete Option</button>
                         </div>
                         
                         ${hasNext ? `
-                        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e9ecef;">
+                        <div class="divider">
+                            <h3 style="margin-bottom: 16px; font-size: 16px;">Sub-Question</h3>
                             <div class="form-group">
-                                <label>Sub-Question</label>
-                                <input type="text" id="subQuestion" value="${option.next.question}">
+                                <label>Question Text</label>
+                                <input type="text" id="subQuestion" value="${escapeHtml(option.next.question)}">
                             </div>
                             <div class="button-group">
                                 <button onclick="updateSubQuestion()">Update Sub-Question</button>
@@ -479,6 +750,12 @@
                     </div>
                 `;
             }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function getNodeAtPath(root, path) {
@@ -495,19 +772,36 @@
             return current;
         }
 
+        function getParentNodeAtPath(root, path) {
+            if (path.length <= 1) return root;
+            
+            let current = root;
+            for (let i = 0; i < path.length - 1; i++) {
+                if (i === path.length - 2) {
+                    return current.options[path[i]].next;
+                } else {
+                    current = current.options[path[i]].next;
+                }
+            }
+            return current;
+        }
+
         function updateQuestion() {
             const question = document.getElementById('questionInput').value;
             treeData.question = question;
             renderTree();
+            saveToStorage();
         }
 
         function addOption() {
-            if (!treeData.options) treeData.options = [];
-            treeData.options.push({
+            const node = selectedPath.length === 0 ? treeData : getNodeAtPath(treeData, selectedPath).next;
+            if (!node.options) node.options = [];
+            node.options.push({
                 text: "New option",
                 result: "New result"
             });
             renderTree();
+            saveToStorage();
         }
 
         function updateOption() {
@@ -546,11 +840,16 @@
             }
             
             renderTree();
+            saveToStorage();
         }
 
         function deleteOption() {
             if (selectedPath.length === 0) {
                 alert("Cannot delete root node");
+                return;
+            }
+            
+            if (!confirm("Are you sure you want to delete this option?")) {
                 return;
             }
             
@@ -561,6 +860,7 @@
             parent.options.splice(index, 1);
             selectedPath = [];
             renderTree();
+            saveToStorage();
         }
 
         function convertToQuestion() {
@@ -577,12 +877,22 @@
             delete option.button;
             delete option.youtube;
             renderTree();
+            saveToStorage();
+        }
+
+        function convertToResult() {
+            const option = getNodeAtPath(treeData, selectedPath);
+            option.result = "New result";
+            delete option.next;
+            renderTree();
+            saveToStorage();
         }
 
         function updateSubQuestion() {
             const option = getNodeAtPath(treeData, selectedPath);
             option.next.question = document.getElementById('subQuestion').value;
             renderTree();
+            saveToStorage();
         }
 
         function addSubOption() {
@@ -593,25 +903,14 @@
                 result: "New result"
             });
             renderTree();
-        }
-
-        function updateCodeOutput() {
-            const code = `const treeData = ${JSON.stringify(treeData, null, 4)};`;
-            document.getElementById('codeOutput').textContent = code;
-        }
-
-        function copyCode() {
-            const code = document.getElementById('codeOutput').textContent;
-            navigator.clipboard.writeText(code).then(() => {
-                alert('Code copied to clipboard!');
-            });
+            saveToStorage();
         }
 
         function arraysEqual(a, b) {
             return a.length === b.length && a.every((val, index) => val === b[index]);
         }
 
-        renderTree();
+        init();
     </script>
 </body>
 </html>
