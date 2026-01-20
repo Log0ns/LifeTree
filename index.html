@@ -307,6 +307,43 @@
 
         let nodeRegistry = {};
         let nodeParentRegistry = {};
+        const STORAGE_KEY = 'zenTreeState';
+
+        function saveState() {
+            const openNodes = [];
+            document.querySelectorAll('.children.visible').forEach(child => {
+                const parentNode = child.parentElement;
+                if (parentNode.id) {
+                    openNodes.push(parentNode.id);
+                }
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(openNodes));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (!saved) return [];
+            try {
+                return JSON.parse(saved);
+            } catch {
+                return [];
+            }
+        }
+
+        function restoreState(openNodes) {
+            openNodes.forEach(nodeId => {
+                const element = nodeRegistry[nodeId];
+                if (element) {
+                    const nodeContent = element.querySelector(':scope > .node-content');
+                    const children = element.querySelector(':scope > .children');
+                    
+                    if (children && nodeContent) {
+                        children.classList.add('visible');
+                        nodeContent.classList.add('selected');
+                    }
+                }
+            });
+        }
 
         function buildParentRegistry(node, parent = null) {
             if (node.id) {
@@ -498,6 +535,7 @@
                         children.classList.add('visible');
                         content.classList.add('selected');
                     }
+                    saveState();
                 });
             } else if (data.options) {
                 const childrenDiv = document.createElement('div');
@@ -529,6 +567,7 @@
                                 optionChildren.classList.add('visible');
                                 optionContent.classList.add('selected');
                             }
+                            saveState();
                         });
                         
                         childrenDiv.appendChild(optionNode);
@@ -551,6 +590,7 @@
                         children.classList.add('visible');
                         content.classList.add('selected');
                     }
+                    saveState();
                 });
             }
 
@@ -565,9 +605,16 @@
             buildParentRegistry(treeData);
             const rootNode = createNode(treeData, true);
             container.appendChild(rootNode);
+            
+            // Restore saved state
+            const openNodes = loadState();
+            if (openNodes.length > 0) {
+                restoreState(openNodes);
+            }
         }
 
         function reset() {
+            localStorage.removeItem(STORAGE_KEY);
             render();
         }
 
