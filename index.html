@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zen Decision Tree</title>
+    <title>LifeTree</title>
     <style>
         * {
             margin: 0;
@@ -29,10 +29,20 @@
         .node {
             margin: 1.5rem 0;
             padding-left: 2rem;
+            scroll-margin-top: 2rem;
         }
 
         .node.root {
             padding-left: 0;
+        }
+
+        .node.highlight {
+            animation: highlight 1s ease;
+        }
+
+        @keyframes highlight {
+            0%, 100% { background: transparent; }
+            50% { background: rgba(52, 152, 219, 0.1); border-radius: 8px; }
         }
 
         .node-content {
@@ -82,9 +92,10 @@
             font-style: italic;
         }
 
-        .link-button, .custom-button {
+        .link-button, .custom-button, .jump-button {
             display: inline-block;
             margin-top: 1rem;
+            margin-right: 0.5rem;
             padding: 0.75rem 1.5rem;
             background: #3498db;
             color: white;
@@ -97,8 +108,18 @@
             font-family: 'Georgia', serif;
         }
 
+        .jump-button {
+            background: #9b59b6;
+        }
+
         .link-button:hover, .custom-button:hover {
             background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .jump-button:hover {
+            background: #8e44ad;
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
@@ -233,61 +254,142 @@
     <div class="tree-container" id="tree"></div>
 
     <script>
-        // Configure your decision tree here
         const treeData = {
-    "question": "What brings you here today?",
-    "options": [
-        {
-            "text": "I need to make a life decision",
-            "result": "New result",
-            "youtube": "k_jhyiQ5-fs"
-        },
-        {
-            "text": "I'm seeking clarity on a situation",
-            "next": {
-                "question": "Can you change the situation?",
-                "options": [
-                    {
-                        "text": "Yes, I have some control",
-                        "result": "Focus your energy on what you can influence. Let go of what you cannot."
-                    },
-                    {
-                        "text": "No, it's beyond my control",
-                        "result": "Acceptance is the path forward. Find peace in releasing what you cannot change."
+            "id": "node_0",
+            "question": "Question",
+            "options": [
+                {
+                    "text": "Option 1",
+                    "next": {
+                        "id": "node_3",
+                        "question": "Question 1",
+                        "options": [
+                            {
+                                "text": "Option 1",
+                                "result": "Result 1",
+                                "jumpTo": "node_4"
+                            },
+                            {
+                                "text": "Option 2",
+                                "result": "Result 2"
+                            }
+                        ]
                     }
-                ]
+                },
+                {
+                    "text": "Option 2",
+                    "next": {
+                        "id": "node_1",
+                        "question": "New question",
+                        "options": [
+                            {
+                                "text": "Option 1",
+                                "next": {
+                                    "id": "node_4",
+                                    "question": "Question 2",
+                                    "options": [
+                                        {
+                                            "text": "Option 1",
+                                            "result": "Result 1"
+                                        },
+                                        {
+                                            "text": "Option 2",
+                                            "result": "Result 2"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+
+        let nodeRegistry = {};
+        let nodeParentRegistry = {};
+
+        function buildParentRegistry(node, parent = null) {
+            if (node.id) {
+                nodeParentRegistry[node.id] = parent;
             }
-        },
-        {
-            "text": "I want to explore a possibility",
-            "next": {
-                "question": "What holds you back?",
-                "options": [
-                    {
-                        "text": "Fear of failure",
-                        "result": "Failure is simply feedback. Each attempt teaches you something valuable. Begin small if you must, but begin."
-                    },
-                    {
-                        "text": "Uncertainty about the path",
-                        "result": "The path reveals itself by walking. Take the first step, and the next will become clear."
-                    },
-                    {
-                        "text": "Resources or time",
-                        "result": "Start with what you have, where you are. Small consistent steps create extraordinary journeys."
+            
+            if (node.options) {
+                node.options.forEach(option => {
+                    if (option.next) {
+                        buildParentRegistry(option.next, node);
                     }
-                ]
+                });
             }
         }
-    ]
-};
 
-        let nodeIdCounter = 0;
+        function getPathToNode(targetId) {
+            const path = [];
+            let currentId = targetId;
+            
+            while (currentId && nodeParentRegistry[currentId]) {
+                path.unshift(currentId);
+                currentId = nodeParentRegistry[currentId].id;
+            }
+            
+            if (currentId) {
+                path.unshift(currentId);
+            }
+            
+            return path;
+        }
+
+        function jumpToNode(targetId) {
+            const path = getPathToNode(targetId);
+            
+            // Open all nodes in the path
+            path.forEach(nodeId => {
+                const element = nodeRegistry[nodeId];
+                if (element) {
+                    // Find the node-content that controls this node's visibility
+                    const nodeContent = element.querySelector(':scope > .node-content');
+                    const children = element.querySelector(':scope > .children');
+                    
+                    if (children && nodeContent) {
+                        children.classList.add('visible');
+                        nodeContent.classList.add('selected');
+                    }
+                    
+                    // Also need to make sure parent option nodes are expanded
+                    let parentNode = element.parentElement;
+                    while (parentNode) {
+                        if (parentNode.classList && parentNode.classList.contains('node')) {
+                            const parentContent = parentNode.querySelector(':scope > .node-content');
+                            const parentChildren = parentNode.querySelector(':scope > .children');
+                            
+                            if (parentChildren && parentContent) {
+                                parentChildren.classList.add('visible');
+                                parentContent.classList.add('selected');
+                            }
+                        }
+                        parentNode = parentNode.parentElement;
+                    }
+                }
+            });
+            
+            // Scroll to the target node
+            setTimeout(() => {
+                const targetElement = nodeRegistry[targetId];
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetElement.classList.add('highlight');
+                    setTimeout(() => targetElement.classList.remove('highlight'), 1000);
+                }
+            }, 100);
+        }
 
         function createNode(data, isRoot = false) {
-            const nodeId = `node-${nodeIdCounter++}`;
             const div = document.createElement('div');
             div.className = `node ${isRoot ? 'root' : ''}`;
-            div.id = nodeId;
+            
+            if (data.id) {
+                div.id = data.id;
+                nodeRegistry[data.id] = div;
+            }
 
             const content = document.createElement('div');
             content.className = 'node-content';
@@ -301,7 +403,6 @@
             div.appendChild(content);
 
             if (data.result) {
-                // Create the children container that will hold the result
                 const childDiv = document.createElement('div');
                 childDiv.className = 'children';
                 
@@ -310,6 +411,18 @@
                 const resultContent = document.createElement('div');
                 resultContent.className = 'node-content result';
                 resultContent.innerHTML = `<div class="result-text">${data.result}</div>`;
+                
+                // Add jump button if present
+                if (data.jumpTo) {
+                    const jumpBtn = document.createElement('button');
+                    jumpBtn.className = 'jump-button';
+                    jumpBtn.textContent = 'Go to related section →';
+                    jumpBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        jumpToNode(data.jumpTo);
+                    };
+                    resultContent.appendChild(jumpBtn);
+                }
                 
                 // Add link if present
                 if (data.link) {
@@ -374,7 +487,6 @@
                 childDiv.appendChild(resultNode);
                 div.appendChild(childDiv);
                 
-                // Make the option clickable to reveal result
                 content.addEventListener('click', () => {
                     const children = div.querySelector('.children');
                     const wasVisible = children.classList.contains('visible');
@@ -393,7 +505,6 @@
                 
                 data.options.forEach(option => {
                     if (option.next) {
-                        // Create a node for the option text
                         const optionNode = document.createElement('div');
                         optionNode.className = 'node';
                         
@@ -402,7 +513,6 @@
                         optionContent.innerHTML = `<div class="option-text">${option.text}</div>`;
                         optionNode.appendChild(optionContent);
                         
-                        // Create children container for the next question/result
                         const optionChildren = document.createElement('div');
                         optionChildren.className = 'children';
                         
@@ -410,7 +520,6 @@
                         optionChildren.appendChild(nextNode);
                         optionNode.appendChild(optionChildren);
                         
-                        // Make clickable
                         optionContent.addEventListener('click', () => {
                             const wasVisible = optionChildren.classList.contains('visible');
                             if (wasVisible) {
@@ -451,7 +560,9 @@
         function render() {
             const container = document.getElementById('tree');
             container.innerHTML = '';
-            nodeIdCounter = 0;
+            nodeRegistry = {};
+            nodeParentRegistry = {};
+            buildParentRegistry(treeData);
             const rootNode = createNode(treeData, true);
             container.appendChild(rootNode);
         }
