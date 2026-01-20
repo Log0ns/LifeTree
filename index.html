@@ -310,36 +310,57 @@
         const STORAGE_KEY = 'zenTreeState';
 
         function saveState() {
-            const openNodes = [];
-            document.querySelectorAll('.children.visible').forEach(child => {
-                const parentNode = child.parentElement;
-                if (parentNode.id) {
-                    openNodes.push(parentNode.id);
+            const state = {};
+            document.querySelectorAll('.node').forEach(node => {
+                if (node.id) {
+                    const children = node.querySelector(':scope > .children');
+                    if (children) {
+                        state[node.id] = children.classList.contains('visible');
+                    }
                 }
             });
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(openNodes));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         }
 
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (!saved) return [];
+            if (!saved) return {};
             try {
                 return JSON.parse(saved);
             } catch {
-                return [];
+                return {};
             }
         }
 
-        function restoreState(openNodes) {
-            openNodes.forEach(nodeId => {
+        function restoreState(state) {
+            Object.keys(state).forEach(nodeId => {
                 const element = nodeRegistry[nodeId];
-                if (element) {
+                if (element && state[nodeId]) {
                     const nodeContent = element.querySelector(':scope > .node-content');
                     const children = element.querySelector(':scope > .children');
                     
                     if (children && nodeContent) {
                         children.classList.add('visible');
                         nodeContent.classList.add('selected');
+                    }
+                }
+            });
+            
+            // Also handle option nodes (nodes without IDs)
+            document.querySelectorAll('.node').forEach(node => {
+                const optionText = node.querySelector(':scope > .node-content .option-text');
+                if (optionText) {
+                    const parent = node.parentElement.parentElement;
+                    if (parent && parent.id && state[parent.id]) {
+                        const children = node.querySelector(':scope > .children');
+                        const content = node.querySelector(':scope > .node-content');
+                        if (children && content && children.children.length > 0) {
+                            const childId = children.querySelector('.node')?.id;
+                            if (childId && state[childId]) {
+                                children.classList.add('visible');
+                                content.classList.add('selected');
+                            }
+                        }
                     }
                 }
             });
@@ -606,11 +627,13 @@
             const rootNode = createNode(treeData, true);
             container.appendChild(rootNode);
             
-            // Restore saved state
-            const openNodes = loadState();
-            if (openNodes.length > 0) {
-                restoreState(openNodes);
-            }
+            // Restore saved state after a brief delay to ensure DOM is ready
+            setTimeout(() => {
+                const state = loadState();
+                if (Object.keys(state).length > 0) {
+                    restoreState(state);
+                }
+            }, 50);
         }
 
         function reset() {
