@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decision Tree Editor</title>
+    <title>LifeTree Editor</title>
     <style>
         * {
             margin: 0;
@@ -97,6 +97,7 @@
             padding: 20px;
             margin: 16px 0;
             transition: all 0.2s ease;
+            scroll-margin-top: 100px;
         }
 
         .node:hover {
@@ -106,6 +107,21 @@
         .node.selected {
             border-color: #007aff;
             background: #f0f8ff;
+        }
+
+        .node.highlight {
+            animation: highlight 1s ease-out;
+        }
+
+        @keyframes highlight {
+            0% {
+                background: #fff9c4;
+                border-color: #fbc02d;
+            }
+            100% {
+                background: #fafafa;
+                border-color: #e5e5e7;
+            }
         }
 
         .node-question {
@@ -119,6 +135,17 @@
 
         .node-question:hover {
             color: #007aff;
+        }
+
+        .node-id-display {
+            font-size: 11px;
+            color: #8e8e93;
+            font-family: monospace;
+            margin-bottom: 8px;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            display: inline-block;
         }
 
         .option {
@@ -173,6 +200,16 @@
         .youtube-badge {
             background: #ffebee;
             color: #c62828;
+        }
+
+        .jump-badge {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            cursor: pointer;
+        }
+
+        .jump-badge:hover {
+            background: #e1bee7;
         }
 
         .editor-form {
@@ -452,18 +489,22 @@
 
     <script>
         const STORAGE_KEY = 'decisionTreeData';
+        let nodeIdCounter = 0;
 
         let treeData = {
+            id: 'node_0',
             question: "What brings you here today?",
             options: [
                 {
                     text: "I need to make a life decision",
                     next: {
+                        id: 'node_1',
                         question: "Is this decision urgent?",
                         options: [
                             {
                                 text: "Yes, I need to decide soon",
                                 next: {
+                                    id: 'node_2',
                                     question: "Have you considered all options?",
                                     options: [
                                         {
@@ -493,6 +534,7 @@
                 {
                     text: "I'm seeking clarity on a situation",
                     next: {
+                        id: 'node_3',
                         question: "Can you change the situation?",
                         options: [
                             {
@@ -509,6 +551,7 @@
                 {
                     text: "I want to explore a possibility",
                     next: {
+                        id: 'node_4',
                         question: "What holds you back?",
                         options: [
                             {
@@ -530,10 +573,48 @@
         };
 
         let selectedPath = [];
+        let nodeRegistry = {};
 
         function init() {
             loadFromStorageAuto();
+            buildNodeRegistry();
+            updateNodeIdCounter();
             renderTree();
+        }
+
+        function buildNodeRegistry() {
+            nodeRegistry = {};
+            function traverse(node) {
+                if (node.id) {
+                    nodeRegistry[node.id] = node;
+                }
+                if (node.options) {
+                    node.options.forEach(option => {
+                        if (option.next) {
+                            traverse(option.next);
+                        }
+                    });
+                }
+            }
+            traverse(treeData);
+        }
+
+        function updateNodeIdCounter() {
+            let maxId = 0;
+            Object.keys(nodeRegistry).forEach(id => {
+                const num = parseInt(id.split('_')[1]);
+                if (!isNaN(num) && num > maxId) {
+                    maxId = num;
+                }
+            });
+            nodeIdCounter = maxId + 1;
+        }
+
+        function ensureNodeId(node) {
+            if (!node.id) {
+                node.id = `node_${nodeIdCounter++}`;
+                nodeRegistry[node.id] = node;
+            }
         }
 
         function saveToStorage() {
@@ -559,29 +640,26 @@
             try {
                 const code = document.getElementById('importTextarea').value.trim();
                 
-                // Extract JSON from the code
                 let jsonStr = code;
                 
-                // Remove "const treeData = " if present
                 if (code.includes('const treeData =')) {
                     jsonStr = code.substring(code.indexOf('=') + 1).trim();
                 }
                 
-                // Remove trailing semicolon if present
                 if (jsonStr.endsWith(';')) {
                     jsonStr = jsonStr.slice(0, -1).trim();
                 }
                 
-                // Parse the JSON
                 const parsedData = JSON.parse(jsonStr);
                 
-                // Validate it has the right structure
                 if (!parsedData.question || !parsedData.options) {
                     throw new Error('Invalid tree data structure');
                 }
                 
                 treeData = parsedData;
                 selectedPath = [];
+                buildNodeRegistry();
+                updateNodeIdCounter();
                 renderTree();
                 hideImportModal();
                 showSaveIndicator('Tree data loaded successfully');
@@ -605,15 +683,18 @@
             if (confirm('Are you sure you want to clear all saved data? This cannot be undone.')) {
                 localStorage.removeItem(STORAGE_KEY);
                 treeData = {
-                    question: "What brings you here today?",
+                    id: 'node_0',
+                    question: "New question?",
                     options: [
                         {
-                            text: "New option",
-                            result: "New result"
+                            text: "Option 1",
+                            result: "Result 1"
                         }
                     ]
                 };
                 selectedPath = [];
+                nodeIdCounter = 1;
+                buildNodeRegistry();
                 renderTree();
                 showSaveIndicator('Storage cleared');
             }
@@ -652,12 +733,20 @@
         }
 
         function renderNode(node, container, path) {
+            ensureNodeId(node);
+            
             const nodeDiv = document.createElement('div');
             nodeDiv.className = 'node';
+            nodeDiv.setAttribute('data-node-id', node.id);
             
             if (arraysEqual(path, selectedPath)) {
                 nodeDiv.className += ' selected';
             }
+
+            const idDisplay = document.createElement('div');
+            idDisplay.className = 'node-id-display';
+            idDisplay.textContent = `ID: ${node.id}`;
+            nodeDiv.appendChild(idDisplay);
 
             const questionDiv = document.createElement('div');
             questionDiv.className = 'node-question';
@@ -678,6 +767,17 @@
                     optionDiv.appendChild(textDiv);
 
                     const badgesDiv = document.createElement('div');
+
+                    if (option.jumpTo) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge jump-badge';
+                        badge.textContent = `jump → ${option.jumpTo}`;
+                        badge.onclick = (e) => {
+                            e.stopPropagation();
+                            jumpToNode(option.jumpTo);
+                        };
+                        badgesDiv.appendChild(badge);
+                    }
 
                     if (option.result) {
                         const badge = document.createElement('span');
@@ -723,6 +823,19 @@
             container.appendChild(nodeDiv);
         }
 
+        function jumpToNode(nodeId) {
+            const nodeElement = document.querySelector(`[data-node-id="${nodeId}"]`);
+            if (nodeElement) {
+                nodeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                nodeElement.classList.add('highlight');
+                setTimeout(() => {
+                    nodeElement.classList.remove('highlight');
+                }, 1000);
+            } else {
+                alert(`Node with ID "${nodeId}" not found`);
+            }
+        }
+
         function selectNode(path) {
             selectedPath = path;
             renderTree();
@@ -734,10 +847,9 @@
             const node = getNodeAtPath(treeData, path);
             
             if (path.length === 0) {
-                // Root question
                 editor.innerHTML = `
                     <div class="editor-form">
-                        <div class="node-path">Root Question</div>
+                        <div class="node-path">Root Question (ID: ${node.id})</div>
                         <div class="form-group">
                             <label>Question Text</label>
                             <input type="text" id="questionInput" value="${escapeHtml(node.question)}">
@@ -749,9 +861,12 @@
                     </div>
                 `;
             } else {
-                // This is an option
                 const option = node;
                 const hasNext = !!option.next;
+                
+                const nodeOptions = Object.keys(nodeRegistry).map(id => 
+                    `<option value="${id}" ${option.jumpTo === id ? 'selected' : ''}>${id}</option>`
+                ).join('');
                 
                 editor.innerHTML = `
                     <div class="editor-form">
@@ -759,6 +874,15 @@
                         <div class="form-group">
                             <label>Option Text</label>
                             <input type="text" id="optionText" value="${escapeHtml(option.text)}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Jump to Node (optional)</label>
+                            <select id="jumpToSelect">
+                                <option value="">No jump</option>
+                                ${nodeOptions}
+                            </select>
+                            <div class="info-text">When clicked, scroll and highlight this node</div>
                         </div>
                         
                         ${!hasNext ? `
@@ -788,7 +912,7 @@
                         <div class="form-group">
                             <label>YouTube Video ID (optional)</label>
                             <input type="text" id="youtubeId" value="${escapeHtml(option.youtube || '')}">
-                            <div class="info-text">e.g., "dQw4w9WgXcQ" from youtube.com/watch?v=dQw4w9WgXcQ</div>
+                            <div class="info-text">e.g., "dQw4w9WgXcQ"</div>
                         </div>
                         ` : ''}
                         
@@ -801,7 +925,7 @@
                         
                         ${hasNext ? `
                         <div class="divider">
-                            <h3 style="margin-bottom: 16px; font-size: 16px;">Sub-Question</h3>
+                            <h3 style="margin-bottom: 16px; font-size: 16px;">Sub-Question (ID: ${option.next.id})</h3>
                             <div class="form-group">
                                 <label>Question Text</label>
                                 <input type="text" id="subQuestion" value="${escapeHtml(option.next.question)}">
@@ -837,20 +961,6 @@
             return current;
         }
 
-        function getParentNodeAtPath(root, path) {
-            if (path.length <= 1) return root;
-            
-            let current = root;
-            for (let i = 0; i < path.length - 1; i++) {
-                if (i === path.length - 2) {
-                    return current.options[path[i]].next;
-                } else {
-                    current = current.options[path[i]].next;
-                }
-            }
-            return current;
-        }
-
         function updateQuestion() {
             const question = document.getElementById('questionInput').value;
             treeData.question = question;
@@ -870,6 +980,13 @@
         function updateOption() {
             const option = getNodeAtPath(treeData, selectedPath);
             option.text = document.getElementById('optionText').value;
+            
+            const jumpToSelect = document.getElementById('jumpToSelect');
+            if (jumpToSelect && jumpToSelect.value) {
+                option.jumpTo = jumpToSelect.value;
+            } else {
+                delete option.jumpTo;
+            }
             
             const result = document.getElementById('resultText');
             if (result) {
@@ -921,12 +1038,14 @@
             
             parent.options.splice(index, 1);
             selectedPath = [];
+            buildNodeRegistry();
             renderTree();
         }
 
         function convertToQuestion() {
             const option = getNodeAtPath(treeData, selectedPath);
             option.next = {
+                id: `node_${nodeIdCounter++}`,
                 question: "New question?",
                 options: [
                     { text: "Option 1", result: "Result 1" },
@@ -937,6 +1056,7 @@
             delete option.link;
             delete option.button;
             delete option.youtube;
+            buildNodeRegistry();
             renderTree();
         }
 
@@ -944,6 +1064,7 @@
             const option = getNodeAtPath(treeData, selectedPath);
             option.result = "New result";
             delete option.next;
+            buildNodeRegistry();
             renderTree();
         }
 
